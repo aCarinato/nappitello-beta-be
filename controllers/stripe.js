@@ -20,7 +20,7 @@ export const createPaymentIntent = async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(404); // if no specific status is set, by default it would fall back to 500
+    res.status(404).json({ segreto: process.env.STRIPE_SECRET_KEY }); // if no specific status is set, by default it would fall back to 500
     // return next(err); // this error is passed to the middleware that handles the error
   }
 };
