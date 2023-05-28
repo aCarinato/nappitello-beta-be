@@ -6,12 +6,18 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // @access  Private
 export const createPaymentIntent = async (req, res) => {
   try {
+    const { totalPrice } = req.body;
+    // console.log(`totalPrice`);
+    // console.log(totalPrice);
+
     const paymentIntent = await stripe.paymentIntents.create({
-      // amount: totalPrice * 100,
-      amount: 1000,
+      amount: totalPrice * 100,
+      // amount: 1000,
       currency: 'eur',
       // instead of coding a list of payment methods, we can turn them on and off from the dashboard
       automatic_payment_methods: { enabled: true },
+      receipt_email: 'alessandro.carinato@gmail.com',
+      description: 'THIS IS A TEST FROM STRIPE!',
     });
     // console.log(paymentIntent.client_secret);
     if (paymentIntent.client_secret) {
