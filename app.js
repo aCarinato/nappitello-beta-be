@@ -24,6 +24,65 @@ app.use((req, res, next) => {
 
 app.use('/api/stripe', stripe);
 
+let endpointSecret;
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+endpointSecret =
+  'whsec_ffafd07b5fda0fe891ec1bd62ea5e9f0a7152ac21cfba35966f7f6dfb3661380';
+
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  (request, response) => {
+    const sig = request.headers['stripe-signature'];
+
+    let data;
+    let eventType;
+
+    if (endpointSecret) {
+      // https://www.youtube.com/watch?v=_TVrn-pyTo8
+      let event;
+
+      try {
+        event = stripe.webhooks.constructEvent(
+          request.body,
+          sig,
+          endpointSecret
+        );
+        console.log('webHUCCO VERIFICATO!');
+      } catch (err) {
+        response.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+      }
+
+      data = event.data.object;
+      eventType = event.type;
+    } else {
+      data = request.body.data.object;
+      eventType = request.body.type;
+    }
+
+    if (eventType === 'checkout.session.completed') {
+    } else if (eventType === 'checkout.session.completed') {
+      const paymentIntentSucceeded = data;
+      console.log(paymentIntentSucceeded);
+    }
+    // // Handle the event
+    // switch (event.type) {
+    //   case 'payment_intent.succeeded':
+    //     const paymentIntentSucceeded = event.data.object;
+    //     // Then define and call a function to handle the event payment_intent.succeeded
+    //     console.log('PAGAMENTO SUCCESSONE!');
+    //     break;
+    //   // ... handle other event types
+    //   default:
+    //     console.log(`Unhandled event type ${event.type}`);
+    // }
+
+    // Return a 200 response to acknowledge receipt of the event
+    response.send();
+  }
+);
+
 // If we get till these middlewares (which access req, res), it means the previous routes gave some error
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
