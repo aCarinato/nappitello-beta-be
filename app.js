@@ -1,15 +1,16 @@
 import express from 'express';
 import 'dotenv/config';
 import Stripe from 'stripe';
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // routes
 import stripeRoutes from './routes/stripe.js';
 
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// let endpointSecret;
+// This is your Stripe CLI webhook secret for testing your endpoint locally.
+const endpointSecret =
+  'whsec_ffafd07b5fda0fe891ec1bd62ea5e9f0a7152ac21cfba35966f7f6dfb3661380';
+
 const app = express();
-
-const port = process.env.PORT || 8000;
-
-app.use(express.json());
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -25,65 +26,57 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/stripe', stripeRoutes);
-
-let endpointSecret;
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
-endpointSecret =
-  'whsec_ffafd07b5fda0fe891ec1bd62ea5e9f0a7152ac21cfba35966f7f6dfb3661380';
-
+// STRIPE webhook
 app.post(
   '/webhook',
   express.raw({ type: 'application/json' }),
   (request, response) => {
     const sig = request.headers['stripe-signature'];
 
-    let data;
-    let eventType;
+    let event;
 
-    if (endpointSecret) {
-      // https://www.youtube.com/watch?v=_TVrn-pyTo8
-      let event;
-
-      try {
-        const payload = request.body.toString();
-        event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-        console.log('webHUCCO VERIFICATO!');
-      } catch (err) {
-        response.status(400).send(`Webhook Error: ${err.message}`);
-        return;
-      }
-
-      data = event.data.object;
-      eventType = event.type;
-    } else {
-      data = request.body.data.object;
-      eventType = request.body.type;
+    try {
+      event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    } catch (err) {
+      console.log(`Webhook Error: ${err.message}`);
+      response.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    if (eventType === 'checkout.session.completed') {
-      console.log('BOH');
-    } else if (eventType === 'payment_intent.succeeded') {
-      const paymentIntentSucceeded = data;
-      console.log(paymentIntentSucceeded);
+    if (event.type === 'checkout.session.completed') {
+      console.log('checkout.session.completed COMPLETATA');
+      console.log(event);
+    } else if (event.type === 'payment_intent.succeeded') {
+      // const paymentIntentSucceeded = data;
+      // console.log(paymentIntentSucceeded);
+      console.log(event);
     }
+
     // // Handle the event
     // switch (event.type) {
     //   case 'payment_intent.succeeded':
-    //     const paymentIntentSucceeded = event.data.object;
-    //     // Then define and call a function to handle the event payment_intent.succeeded
-    //     console.log('PAGAMENTO SUCCESSONE!');
+    //     const paymentIntent = event.data.object;
+    //     console.log('PaymentIntent was successful!');
+    //     break;
+    //   case 'payment_method.attached':
+    //     const paymentMethod = event.data.object;
+    //     console.log('PaymentMethod was attached to a Customer!');
     //     break;
     //   // ... handle other event types
     //   default:
     //     console.log(`Unhandled event type ${event.type}`);
     // }
 
-    // Return a 200 response to acknowledge receipt of the event
+    // Return a response to acknowledge receipt of the event
+    // response.json({received: true});
+
     response.send();
   }
 );
 
-// If we get till these middlewares (which access req, res), it means the previous routes gave some error
+const port = process.env.PORT || 8000;
+
+app.use(express.json());
+
+app.use('/api/stripe', stripeRoutes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));
