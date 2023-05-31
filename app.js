@@ -1,6 +1,9 @@
 import express from 'express';
 import 'dotenv/config';
-import stripe from './routes/stripe.js';
+import Stripe from 'stripe';
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// routes
+import stripeRoutes from './routes/stripe.js';
 
 const app = express();
 
@@ -22,7 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use('/api/stripe', stripe);
+app.use('/api/stripe', stripeRoutes);
 
 let endpointSecret;
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
