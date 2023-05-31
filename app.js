@@ -46,11 +46,8 @@ app.post(
       let event;
 
       try {
-        event = stripe.webhooks.constructEvent(
-          request.body.toString(),
-          sig,
-          endpointSecret
-        );
+        const payload = request.body.toString();
+        event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
         console.log('webHUCCO VERIFICATO!');
       } catch (err) {
         response.status(400).send(`Webhook Error: ${err.message}`);
