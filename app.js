@@ -62,7 +62,8 @@ app.post(
     }
 
     if (eventType === 'checkout.session.completed') {
-    } else if (eventType === 'checkout.session.completed') {
+      console.log('BOH');
+    } else if (eventType === 'payment_intent.succeeded') {
       const paymentIntentSucceeded = data;
       console.log(paymentIntentSucceeded);
     }
