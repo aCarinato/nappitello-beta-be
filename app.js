@@ -29,30 +29,38 @@ app.use((req, res, next) => {
 // STRIPE webhook
 app.post(
   '/webhook',
-  express.raw({ type: 'application/json' }),
+  express.json({ type: 'application/json' }),
   (request, response) => {
-    const sig = request.headers['stripe-signature'];
+    const event = request.body;
 
-    let event;
+    // app.post(
+    //   '/webhook',
+    //   express.raw({ type: 'application/json' }),
+    //   (request, response) => {
+    //     const sig = request.headers['stripe-signature'];
 
-    try {
-      event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
-    } catch (err) {
-      console.log(`Webhook Error: ${err.message}`);
-      response.status(400).send(`Webhook Error: ${err.message}`);
-      return;
-    }
+    //     let event;
+
+    // try {
+    //   event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    // } catch (err) {
+    //   console.log(`Webhook Error: ${err.message}`);
+    //   response.status(400).send(`Webhook Error: ${err.message}`);
+    //   return;
+    // }
 
     // Handle the event
     switch (event.type) {
       case 'charge.succeeded':
         const chargeSucceeded = event.data.object;
-        // console.log(chargeSucceeded);
+        console.log(`chargeSucceeded`);
+        console.log(chargeSucceeded);
         // Then define and call a function to handle the event charge.succeeded
         break;
       case 'payment_intent.succeeded':
         const paymentIntent = event.data.object;
         console.log('PaymentIntent was successful!');
+        console.log(paymentIntent);
         break;
       // ... handle other event types
       default:
