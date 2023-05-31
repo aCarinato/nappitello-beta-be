@@ -40,34 +40,33 @@ app.post(
     } catch (err) {
       console.log(`Webhook Error: ${err.message}`);
       response.status(400).send(`Webhook Error: ${err.message}`);
+      return;
     }
 
-    if (event.type === 'checkout.session.completed') {
-      console.log('checkout.session.completed COMPLETATA');
-      console.log(event);
-    } else if (event.type === 'payment_intent.succeeded') {
-      // const paymentIntentSucceeded = data;
-      // console.log(paymentIntentSucceeded);
-      console.log(event);
+    // Handle the event
+    switch (event.type) {
+      case 'charge.succeeded':
+        const chargeSucceeded = event.data.object;
+        // console.log(chargeSucceeded);
+        // Then define and call a function to handle the event charge.succeeded
+        break;
+      case 'payment_intent.succeeded':
+        const paymentIntent = event.data.object;
+        console.log('PaymentIntent was successful!');
+        break;
+      // ... handle other event types
+      default:
+        console.log(`Unhandled event type ${event.type}`);
     }
 
-    // // Handle the event
-    // switch (event.type) {
-    //   case 'payment_intent.succeeded':
-    //     const paymentIntent = event.data.object;
-    //     console.log('PaymentIntent was successful!');
-    //     break;
-    //   case 'payment_method.attached':
-    //     const paymentMethod = event.data.object;
-    //     console.log('PaymentMethod was attached to a Customer!');
-    //     break;
-    //   // ... handle other event types
-    //   default:
-    //     console.log(`Unhandled event type ${event.type}`);
+    // if (event.type === 'checkout.session.completed') {
+    //   console.log('checkout.session.completed COMPLETATA');
+    //   console.log(event);
+    // } else if (event.type === 'payment_intent.succeeded') {
+    //   // const paymentIntentSucceeded = data;
+    //   // console.log(paymentIntentSucceeded);
+    //   console.log(event);
     // }
-
-    // Return a response to acknowledge receipt of the event
-    // response.json({received: true});
 
     response.send();
   }
