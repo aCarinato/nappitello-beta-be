@@ -27,11 +27,33 @@ app.use((req, res, next) => {
 });
 
 // STRIPE webhook
+// app.post(
+//   '/webhook',
+//   express.json({ type: 'application/json' }),
+//   (request, response) => {
+//     const event = request.body;
+
 app.post(
   '/webhook',
-  express.json({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   (request, response) => {
-    const event = request.body;
+    let event = request.body;
+    // Only verify the event if you have an endpoint secret defined.
+    // Otherwise use the basic event deserialized with JSON.parse
+    if (endpointSecret) {
+      // Get the signature sent by Stripe
+      const signature = request.headers['stripe-signature'];
+      try {
+        event = stripe.webhooks.constructEvent(
+          request.body,
+          signature,
+          endpointSecret
+        );
+      } catch (err) {
+        console.log(`⚠️  Webhook signature verification failed.`, err.message);
+        return response.sendStatus(400);
+      }
+    }
 
     // app.post(
     //   '/webhook',
