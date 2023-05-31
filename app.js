@@ -50,8 +50,10 @@ app.post(
           endpointSecret
         );
       } catch (err) {
-        console.log(`⚠️  Webhook signature verification failed.`, err.message);
-        return response.sendStatus(400);
+        response.status(400).send(`Webhook Error: ${err.message}`);
+        return;
+        // console.log(`⚠️  Webhook signature verification failed.`, err.message);
+        // return response.sendStatus(400);
       }
     }
 
