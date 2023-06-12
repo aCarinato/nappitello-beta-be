@@ -7,8 +7,8 @@ import stripeRoutes from './routes/stripe.js';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // let endpointSecret;
 // This is your Stripe CLI webhook secret for testing your endpoint locally.
-const endpointSecret =
-  'whsec_ffafd07b5fda0fe891ec1bd62ea5e9f0a7152ac21cfba35966f7f6dfb3661380';
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+('whsec_88785b4e3ea5b10d76166e1254a131630b72e1e131109066ae7b77916047ced1');
 
 const app = express();
 
@@ -27,37 +27,37 @@ app.use((req, res, next) => {
 });
 
 // STRIPE webhook
+// app.post(
+//   '/webhook',
+//   express.json({ type: 'application/json' }),
+//   (request, response) => {
+//     const event = request.body;
+
 app.post(
   '/webhook',
-  express.json({ type: 'application/json' }),
+  express.raw({ type: 'application/json' }),
   (request, response) => {
-    const event = request.body;
-
-    // app.post(
-    //   '/webhook',
-    //   express.raw({ type: 'application/json' }),
-    //   (request, response) => {
-    //     let event = request.body;
-    //     // Only verify the event if you have an endpoint secret defined.
-    //     // Otherwise use the basic event deserialized with JSON.parse
-    //     if (endpointSecret) {
-    //       // Get the signature sent by Stripe
-    //       const signature = request.headers['stripe-signature'];
-    //       try {
-    //         event = stripe.webhooks.constructEvent(
-    //           request.body,
-    //           signature,
-    //           endpointSecret
-    //         );
-    //       } catch (err) {
-    //         response
-    //           .status(400)
-    //           .send({ error: `Webhook Error: ${err.message}`, event: event });
-    //         return;
-    //         // console.log(`⚠️  Webhook signature verification failed.`, err.message);
-    //         // return response.sendStatus(400);
-    //       }
-    //     }
+    let event = request.body;
+    // Only verify the event if you have an endpoint secret defined.
+    // Otherwise use the basic event deserialized with JSON.parse
+    if (endpointSecret) {
+      // Get the signature sent by Stripe
+      const signature = request.headers['stripe-signature'];
+      try {
+        event = stripe.webhooks.constructEvent(
+          request.body,
+          signature,
+          endpointSecret
+        );
+      } catch (err) {
+        response
+          .status(400)
+          .send({ error: `Webhook Error: ${err.message}`, event: event });
+        return;
+        // console.log(`⚠️  Webhook signature verification failed.`, err.message);
+        // return response.sendStatus(400);
+      }
+    }
 
     // app.post(
     //   '/webhook',
