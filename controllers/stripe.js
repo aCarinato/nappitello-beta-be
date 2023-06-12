@@ -25,8 +25,8 @@ export const createPaymentIntent = async (req, res) => {
       // instead of coding a list of payment methods, we can turn them on and off from the dashboard
       automatic_payment_methods: { enabled: true },
       // receipt_email: email,
-      // receipt_email: 'alessandro.carinato@gmail.com',
-      // description: 'THIS IS A TEST FROM STRIPE!',
+      receipt_email: 'alessandro.carinato@gmail.com',
+      description: 'THIS IS A TEST FROM STRIPE!',
     });
     // console.log(paymentIntent.client_secret);
     if (paymentIntent.client_secret) {
