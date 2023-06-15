@@ -7,6 +7,24 @@ import User from '../models/User.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+// @desc    Get the current user to protect routes
+// @route   GET /api/auth/current-user
+// @access  Private
+export const currentUser = async (req, res) => {
+  try {
+    // IF YOU USE THE expressjwt middleware:
+    // const user = await User.findById(req.auth._id);
+
+    // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
+    const user = await User.findById(req.user._id).select('-password');
+    // res.json(user);
+    res.json({ success: true, user });
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
+};
+
 // @desc    Signup new user
 // @route   POST /api/auth/signup
 // @access  Public
@@ -41,7 +59,7 @@ export const signup = async (req, res) => {
 
   const customer = await stripe.customers.create(newStripeCustomer);
 
-  console.log(customer);
+  // console.log(customer);
 
   if (customer) {
     // create a user in the db
@@ -75,7 +93,7 @@ export const signup = async (req, res) => {
 export const login = async (req, res) => {
   const { email, password } = req.body;
 
-  console.log(req.body);
+  // console.log(req.body);
 
   // res.json({ message: 'Grintaaa' });
   let existingUser;
