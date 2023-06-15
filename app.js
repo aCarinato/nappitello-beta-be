@@ -1,14 +1,19 @@
 import express from 'express';
 import 'dotenv/config';
-import Stripe from 'stripe';
+// import Stripe from 'stripe';
 // routes
 import stripeRoutes from './routes/stripe.js';
+import authRoutes from './routes/auth.js';
+// utils
+import connectDB from './utils/db.js';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-// let endpointSecret;
-// This is your Stripe CLI webhook secret for testing your endpoint locally.
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-// ('whsec_88785b4e3ea5b10d76166e1254a131630b72e1e131109066ae7b77916047ced1');
+// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// // let endpointSecret;
+// // This is your Stripe CLI webhook secret for testing your endpoint locally.
+// const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+// // ('whsec_88785b4e3ea5b10d76166e1254a131630b72e1e131109066ae7b77916047ced1');
+
+connectDB();
 
 const app = express();
 
@@ -111,5 +116,6 @@ const port = process.env.PORT || 8000;
 app.use(express.json());
 
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/auth', authRoutes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

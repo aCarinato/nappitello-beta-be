@@ -6,17 +6,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // @access  Private
 export const createPaymentIntent = async (req, res) => {
   try {
-    const { totalPrice } = req.body;
+    // const { totalPrice } = req.body;
 
     // calculate the total price in the backend, it is more secure against a malicious actor
 
-    // CREATE A CUSTOMER
-    // const customer = await stripe.customers.create({
-    //   email: 'test@test.com',
-    //   description:
-    //     'My First Test Customer (created for API docs at https://www.stripe.com/docs/api)',
-    //   preferred_locales: ['it-IT'],
-    // });
+    const { email, stripeId, totalPrice } = req.body;
+    console.log(req.body);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalPrice * 100,
@@ -24,8 +19,9 @@ export const createPaymentIntent = async (req, res) => {
       currency: 'eur',
       // instead of coding a list of payment methods, we can turn them on and off from the dashboard
       automatic_payment_methods: { enabled: true },
-      // receipt_email: email,
-      receipt_email: 'alessandro.carinato@gmail.com',
+      receipt_email: email,
+      customer: stripeId,
+      // receipt_email: 'alessandro.carinato@gmail.com',
       description: 'THIS IS A TEST FROM STRIPE!',
     });
     // console.log(paymentIntent.client_secret);
