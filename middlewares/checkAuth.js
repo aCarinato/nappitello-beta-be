@@ -27,3 +27,20 @@ export const requireSignin = async (req, res, next) => {
     return res.status(401).send('Authentication failed. Token NOT found');
   }
 };
+
+export const requireAdmin = async (req, res, next) => {
+  // console.log('SECONDO MIDDLEWARE');
+  if (req.user && req.user.isAdmin) {
+    // console.log('UN ADMIN');
+    next();
+  } else {
+    // console.log('NOT UN ADMIN');
+    return res.status(401).send('User not found or user is NOT AN ADMIN');
+  }
+  // if (req.user && req.user.isAdmin) {
+  //   next();
+  // } else {
+  //   console.log(err);
+  //   return res.status(401).send('User not found or user is NOT AN ADMIN');
+  // }
+};

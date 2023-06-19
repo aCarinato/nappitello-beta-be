@@ -94,6 +94,34 @@ app.post(
         console.log(paymentIntent);
         break;
       // ... handle other event types
+      // case 'checkout.session.completed':
+      //   const session = event.data.object;
+      //   console.log('checkout.session.completed');
+      //   console.log(session);
+      //   // Save an order in your database, marked as 'awaiting payment'
+      //   // createOrder(session);
+
+      //   // Check if the order is paid (for example, from a card payment)
+      //   //
+      //   // A delayed notification payment will have an `unpaid` status, as
+      //   // you're still waiting for funds to be transferred from the customer's
+      //   // account.
+      //   if (session.payment_status === 'paid') {
+      //     console.log('PAGATTOO');
+      //     // fulfillOrder(session);
+      //   }
+
+      //   break;
+
+      // case 'checkout.session.async_payment_succeeded': {
+      //   const session = event.data.object;
+      //   console.log('checkout.session.async_payment_succeeded');
+      //   console.log(session);
+      //   // Fulfill the purchase...
+      //   // fulfillOrder(session);
+
+      //   break;
+      // }
       default:
         console.log(`Unhandled event type ${event.type}`);
     }

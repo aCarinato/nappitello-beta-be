@@ -10,7 +10,8 @@ export const createPaymentIntent = async (req, res) => {
 
     // calculate the total price in the backend, it is more secure against a malicious actor
 
-    const { email, stripeId, totalPrice } = req.body;
+    const { email, stripeId, totalPrice, shipping } = req.body;
+    console.log('CIAO DA BACKEND');
     console.log(req.body);
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -22,7 +23,18 @@ export const createPaymentIntent = async (req, res) => {
       receipt_email: email,
       customer: stripeId,
       // receipt_email: 'alessandro.carinato@gmail.com',
-      description: 'THIS IS A TEST FROM STRIPE!',
+      description: 'NAPPITELLO - Ordine effettuato con successo',
+      shipping: shipping,
+      // shipping: {
+      //   name: 'Gigetto Mancuso',
+      //   address: {
+      //     city: 'Trieste',
+      //     country: 'IT',
+      //     line1: 'Via Lollo Mulon, 883',
+      //     postal_code: '38118',
+      //     state: 'Friuli Venezia Giulia',
+      //   },
+      // },
     });
     // console.log(paymentIntent.client_secret);
     if (paymentIntent.client_secret) {
