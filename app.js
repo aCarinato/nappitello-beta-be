@@ -4,14 +4,9 @@ import 'dotenv/config';
 // routes
 import stripeRoutes from './routes/stripe.js';
 import authRoutes from './routes/auth.js';
+import orderRoutes from './routes/orders.js';
 // utils
 import connectDB from './utils/db.js';
-
-// const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-// // let endpointSecret;
-// // This is your Stripe CLI webhook secret for testing your endpoint locally.
-// const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-// // ('whsec_88785b4e3ea5b10d76166e1254a131630b72e1e131109066ae7b77916047ced1');
 
 connectDB();
 
@@ -83,16 +78,16 @@ app.post(
     // Handle the event
     switch (event.type) {
       case 'charge.succeeded':
-        const chargeSucceeded = event.data.object;
+        // const chargeSucceeded = event.data.object;
         console.log(`chargeSucceeded`);
-        console.log(chargeSucceeded);
+        // console.log(chargeSucceeded);
         // Then define and call a function to handle the event charge.succeeded
         break;
-      case 'payment_intent.succeeded':
-        const paymentIntent = event.data.object;
-        console.log('PaymentIntent was successful!');
-        console.log(paymentIntent);
-        break;
+      // case 'payment_intent.succeeded':
+      //   const paymentIntent = event.data.object;
+      //   console.log('PaymentIntent was successful!');
+      //   console.log(paymentIntent);
+      //   break;
       // ... handle other event types
       // case 'checkout.session.completed':
       //   const session = event.data.object;
@@ -145,5 +140,6 @@ app.use(express.json());
 
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/orders', orderRoutes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

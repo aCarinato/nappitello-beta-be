@@ -11,8 +11,8 @@ export const createPaymentIntent = async (req, res) => {
     // calculate the total price in the backend, it is more secure against a malicious actor
 
     const { email, stripeId, totalPrice, shipping } = req.body;
-    console.log('CIAO DA BACKEND');
-    console.log(req.body);
+    // console.log('CIAO DA BACKEND');
+    // console.log(req.body);
 
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalPrice * 100,
