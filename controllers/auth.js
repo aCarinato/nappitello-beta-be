@@ -18,7 +18,11 @@ export const currentUser = async (req, res) => {
     // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
     const user = await User.findById(req.user._id).select('-password');
     // res.json(user);
-    res.json({ success: true, user });
+    if (user) {
+      res.json({ ok: true, success: true, user });
+    } else {
+      res.json({ ok: false, success: false });
+    }
   } catch (err) {
     console.log(err);
     res.sendStatus(400);
@@ -130,7 +134,7 @@ export const login = async (req, res) => {
   token = jwt.sign(
     { _id: existingUser._id, email: existingUser.email },
     process.env.JWT_SECRET,
-    { expiresIn: '7d' }
+    { expiresIn: '2d' }
   );
 
   res.status(201).json({
@@ -141,4 +145,27 @@ export const login = async (req, res) => {
     stripeId: existingUser.stripeId,
     token: token,
   });
+};
+
+// @desc    Check if current user is admin
+// @route   GET /api/auth/current-admin
+// @access  Private
+export const currentUserIsAdmin = async (req, res) => {
+  try {
+    // IF YOU USE THE expressjwt middleware:
+    // const user = await User.findById(req.auth._id);
+
+    // IF YOU USE THE 'SELF-MADE' (requireSignin) MIDDLEWARE:
+    const user = await User.findById(req.user._id);
+    // console.log(user);
+    // res.json(user);
+    if (user.isAdmin) {
+      res.json({ ok: true });
+    } else {
+      res.json({ ok: false });
+    }
+  } catch (err) {
+    console.log(err);
+    res.sendStatus(400);
+  }
 };

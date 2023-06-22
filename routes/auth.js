@@ -8,6 +8,7 @@ import {
   //   activateAccount,
   login,
   currentUser,
+  currentUserIsAdmin,
   //   getUser,
   //   updateProfile,
 } from '../controllers/auth.js';
@@ -18,6 +19,7 @@ router.get('/current-user', requireSignin, currentUser);
 router.post('/signup', signup);
 // router.post('/signup/activate', activateAccount);
 router.post('/login', login);
+router.get('/current-admin', requireSignin, currentUserIsAdmin);
 // router.put('/update', requireSignin, updateProfile);
 
 export default router;
