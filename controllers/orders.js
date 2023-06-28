@@ -79,7 +79,7 @@ export const fulfillOrder = async (req, res) => {
 
   const msg = {
     to: customer.email, // Change to your recipient
-    from: 'info@sogrowers.com', // Change to your verified sender
+    from: process.env.SG_EMAIL_FROM, // 'info@sogrowers.com', // Change to your verified sender
     subject: `Nappitello - Fulfillment order ${orderId}`,
     // text: 'and easy to do anywhere, even with Node.js',
     html: emailHtml,
