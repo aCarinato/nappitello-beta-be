@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 
 const orderSchema = mongoose.Schema(
   {
+    paymentIntentId: { type: String },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
@@ -82,6 +83,7 @@ const orderSchema = mongoose.Schema(
       required: true,
       default: false,
     },
+    shippedAt: { type: Date },
     isDelivered: {
       type: Boolean,
       required: true,

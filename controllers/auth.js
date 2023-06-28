@@ -36,6 +36,20 @@ export const signup = async (req, res) => {
   //   console.log(req.body);
   const { name, surname, email, password, language } = req.body;
 
+  let existingUser;
+  try {
+    existingUser = await User.findOne({ email: email });
+    // res.status(200).json(existingUser);
+  } catch (err) {
+    res.status(500).json(err);
+  }
+
+  if (existingUser) {
+    return res.json({
+      error: 'User already registered',
+    });
+  }
+
   let hashedPassword;
   try {
     hashedPassword = await bcrypt.hash(password, 12);
@@ -61,9 +75,13 @@ export const signup = async (req, res) => {
     preferred_locales,
   };
 
+  // TODO: check if there is a stripe user with this email already!!!
   const customer = await stripe.customers.create(newStripeCustomer);
 
   // console.log(customer);
+
+  // !!!!!!!!!!!!!!!!!
+  // I NEED TO CHECK IF THE USER ALREADY EXISTS!!
 
   if (customer) {
     // create a user in the db

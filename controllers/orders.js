@@ -1,7 +1,10 @@
+// libs
+import sgMail from '@sendgrid/mail';
+// models
 import Order from '../models/Order.js';
 // utils
-import { sendEmail } from '../utils/sendEmail.js';
-import sgMail from '@sendgrid/mail';
+import { createOrderFulfillmentEmail } from '../utils/templates/orderFulfillment.js';
+import { setOrderShipped } from '../utils/orderManagement/orderManagement.js';
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -12,15 +15,16 @@ export const createNewOrder = async (req, res) => {
   try {
     // console.log(req.user._id);
     // console.log(req.body);
-    const orderItems = req.body.cartItems.map((item) => {
+    const orderItems = req.body.cart.cartItems.map((item) => {
       const { _id, price, countInStock, quantity } = item;
       return { product: _id, price, countInStock, quantity };
     });
 
     const order = {
+      paymentIntentId: req.body.paymentIntentId,
       user: req.user._id,
       orderItems: orderItems,
-      shippingAddress: req.body.shippingAddress,
+      shippingAddress: req.body.cart.shippingAddress,
     };
 
     const newOrder = await new Order(order).save();
@@ -29,7 +33,7 @@ export const createNewOrder = async (req, res) => {
 
     if (newOrder) res.json({ success: true });
 
-    // somewhere qty in stock needs to be updated
+    // TODO: somewhere qty in stock needs to be updated !!!!!!
   } catch (err) {
     console.log(err);
   }
@@ -48,16 +52,37 @@ export const getAllOrders = async (req, res) => {
   }
 };
 
+// @desc    Fetch an order
+// @route   GET /api/orders/get-order/:id
+// @access  Private (admin only)
+export const getOrder = async (req, res) => {
+  try {
+    const id = req.params.id;
+    // console.log(id);
+    const order = await Order.findById(id);
+    // console.log(order);
+    if (order) res.status(200).json({ success: true, order });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 // @desc    Fetch all orders
 // @route   POST /api/orders/fulfill-order
 // @access  Private (admin only)
 export const fulfillOrder = async (req, res) => {
+  const { orderId, customer } = req.body;
+
+  await setOrderShipped(orderId);
+
+  const emailHtml = createOrderFulfillmentEmail(customer.name);
+
   const msg = {
-    to: 'supergrowers.co@gmail.com', // Change to your recipient
-    from: 'alessandro.carinato@gmail.com', // Change to your verified sender
-    subject: 'Sending with SendGrid is Fun',
-    text: 'and easy to do anywhere, even with Node.js',
-    html: '<strong>and easy to do anywhere, even with Node.js</strong>',
+    to: customer.email, // Change to your recipient
+    from: 'info@sogrowers.com', // Change to your verified sender
+    subject: `Nappitello - Fulfillment order ${orderId}`,
+    // text: 'and easy to do anywhere, even with Node.js',
+    html: emailHtml,
   };
 
   // const message = {
@@ -106,34 +131,3 @@ export const fulfillOrder = async (req, res) => {
     console.log(err);
   }
 };
-// export const fulfillOrder = async (req, res) => {
-//   try {
-//     const message = `
-//     <html lang="en">
-//         <head>
-//           <link rel="preconnect" href="https://fonts.googleapis.com">
-//           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-//           <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
-//         </head>
-//         <body>
-//           <div style="color: rgb(63, 80, 110); font-family: 'Montserrat', sans-serif; font-size: 16px; ">
-//             <div style="width: 350px; background-color: #fff; margin: 12px auto padding: 0.8rem">
-//               <div style="text-align: center;" >
-//                 <h2 style="color: rgb(13, 0, 134);">ciaooooooo</h2>
-//               </div>
-//             </div>
-//           </div>
-//         </body>
-//     </html>`;
-
-//     sendEmail({
-//       to: 'alessandro.carinato@gmail.com',
-//       subject: 'DAI DESSO',
-//       text: message,
-//     });
-
-//     res.status(200).json({ success: true, message: `Email successfully sent` });
-//   } catch (err) {
-//     console.log(err);
-//   }
-// };

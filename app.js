@@ -4,9 +4,11 @@ import 'dotenv/config';
 // routes
 import stripeRoutes from './routes/stripe.js';
 import authRoutes from './routes/auth.js';
-import orderRoutes from './routes/orders.js';
+import ordersRoutes from './routes/orders.js';
+import customersRoutes from './routes/customers.js';
 // utils
 import connectDB from './utils/db.js';
+import { setOrderPaid } from './utils/orderManagement/orderManagement.js';
 
 connectDB();
 
@@ -78,10 +80,12 @@ app.post(
     // Handle the event
     switch (event.type) {
       case 'charge.succeeded':
-        // const chargeSucceeded = event.data.object;
+        const chargeSucceeded = event.data.object;
         console.log(`chargeSucceeded`);
-        // console.log(chargeSucceeded);
-        // Then define and call a function to handle the event charge.succeeded
+        console.log(chargeSucceeded);
+        if (chargeSucceeded.payment_intent)
+          // Then define and call a function to handle the event charge.succeeded
+          setOrderPaid(chargeSucceeded.payment_intent);
         break;
       // case 'payment_intent.succeeded':
       //   const paymentIntent = event.data.object;
@@ -140,6 +144,7 @@ app.use(express.json());
 
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/auth', authRoutes);
-app.use('/api/orders', orderRoutes);
+app.use('/api/orders', ordersRoutes);
+app.use('/api/customers', customersRoutes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

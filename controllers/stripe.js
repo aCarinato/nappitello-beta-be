@@ -36,10 +36,12 @@ export const createPaymentIntent = async (req, res) => {
       //   },
       // },
     });
-    // console.log(paymentIntent.client_secret);
+    // console.log(`paymentIntent from controller`);
+    // console.log(paymentIntent);
     if (paymentIntent.client_secret) {
       res.json({
         clientSecret: paymentIntent.client_secret,
+        paymentIntentId: paymentIntent.id,
       });
     }
   } catch (err) {
