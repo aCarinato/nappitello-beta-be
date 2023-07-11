@@ -12,6 +12,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import crypto from 'crypto';
 // models
 import Upload from '../models/Upload.js';
+import Product from '../models/Product.js';
 
 const generateFileName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString('hex');
@@ -74,13 +75,27 @@ export const uploadFile = async (req, res) => {
       ContentType: req.file.mimetype,
     };
 
+    // console.log(req.file.originalname);
+
     const upload = await s3Client.send(new PutObjectCommand(uploadParams));
-    console.log(upload);
+    // console.log(upload);
 
-    const newUpload = new Upload({ name: req.file.originalname }).save();
-    console.log(newUpload);
+    const newUpload = new Upload({ name: req.file.originalname });
 
-    res.status(200).json({ success: true });
+    const savedUpload = await newUpload.save();
+    // console.log(savedUpload);
+    // savedUpload._id && savedUpload._id.toString().length > 0
+
+    if (savedUpload) {
+      // // console.log(newUpload);
+      // console.log('dio caaaaan');
+      res.status(200).json({ success: true, img: newUpload });
+    } else {
+      return res.json({
+        error: 'Upload failed',
+      });
+    }
+
     // const command = new PutObjectAclCommand(uploadParams);
   } catch (err) {
     console.log(err);
@@ -107,6 +122,39 @@ export async function getObjectSignedUrl(key) {
     console.log(err);
   }
 }
+
+// @desc    Get a url to visualise an image
+// @route   GET /api/products/list-urls
+// @access  Public
+export const getObjectsSignedUrl = async (req, res) => {
+  try {
+    const { productID } = req.body;
+    // retrieve the product
+    const product = await Product.findById(productID);
+
+    if (product) {
+      let imagesUrls = [];
+      for (let imageID of product.images) {
+        // find the image
+        const image = await Upload.findById(imageID);
+        const params = {
+          Bucket: bucketName,
+          Key: image.name,
+        };
+        const command = new GetObjectCommand(params);
+        const seconds = 60;
+        const url = await getSignedUrl(s3Client, command, {
+          expiresIn: seconds,
+        });
+        const imageItem = { _id: image._id, name: image.name, url };
+        imagesUrls = [...imagesUrls, imageItem];
+      }
+      res.status(200).json({ success: true, urls: imagesUrls });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 // @desc    List files in the bucket
 // @route   GET /api/products/list-files
@@ -192,6 +240,24 @@ export const getFile = async (req, res) => {
     // //   const response = await s3Client.send(command);
     // console.log(response.Contents);
     // res.status(200).json({ success: true, files: response.Contents });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Create new product
+// @route   POST /api/products/new
+// @access  Private (admin only)
+export const newProduct = async (req, res) => {
+  try {
+    console.log(req.body);
+    // res.status(200).json({ success: true });
+    const newProduct = new Product(req.body);
+
+    const savedProduct = await newProduct.save();
+    console.log(savedProduct);
+
+    if (savedProduct) res.status(200).json({ success: true, savedProduct });
   } catch (err) {
     console.log(err);
   }
