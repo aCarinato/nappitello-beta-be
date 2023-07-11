@@ -6,6 +6,7 @@ import stripeRoutes from './routes/stripe.js';
 import authRoutes from './routes/auth.js';
 import ordersRoutes from './routes/orders.js';
 import customersRoutes from './routes/customers.js';
+import productsRoutes from './routes/products.js';
 // utils
 import connectDB from './utils/db.js';
 import { setOrderPaid } from './utils/orderManagement/orderManagement.js';
@@ -146,5 +147,6 @@ app.use('/api/stripe', stripeRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/orders', ordersRoutes);
 app.use('/api/customers', customersRoutes);
+app.use('/api/products', productsRoutes);
 
 app.listen(port, () => console.log(`Server running on port ${port}`));

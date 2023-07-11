@@ -131,3 +131,16 @@ export const fulfillOrder = async (req, res) => {
     console.log(err);
   }
 };
+
+// @desc    Fetch all orders
+// @route   GET /api/orders/get-customer-orders/
+// @access  Private
+export const getCustomerOrders = async (req, res) => {
+  try {
+    const orders = await Order.find({ user: req.user._id });
+    // console.log(orders);
+    if (orders) res.status(200).json({ success: true, orders });
+  } catch (err) {
+    console.log(err);
+  }
+};
