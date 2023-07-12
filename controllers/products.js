@@ -123,12 +123,13 @@ export async function getObjectSignedUrl(key) {
   }
 }
 
-// @desc    Get a url to visualise an image
-// @route   GET /api/products/list-urls
+// @desc    Get a product with the images urls
+// @route   GET /api/product/:id
 // @access  Public
-export const getObjectsSignedUrl = async (req, res) => {
+export const getProduct = async (req, res) => {
   try {
-    const { productID } = req.body;
+    // console.log(req.params);
+    const productID = req.params.id;
     // retrieve the product
     const product = await Product.findById(productID);
 
@@ -149,7 +150,13 @@ export const getObjectsSignedUrl = async (req, res) => {
         const imageItem = { _id: image._id, name: image.name, url };
         imagesUrls = [...imagesUrls, imageItem];
       }
-      res.status(200).json({ success: true, urls: imagesUrls });
+      // const sentProduct = { product, imagesUrls };
+      res.status(200).json({ success: true, product: { product, imagesUrls } });
+    } else {
+      return res.json({
+        success: false,
+        error: 'Product not found',
+      });
     }
   } catch (err) {
     console.log(err);
@@ -250,14 +257,62 @@ export const getFile = async (req, res) => {
 // @access  Private (admin only)
 export const newProduct = async (req, res) => {
   try {
-    console.log(req.body);
+    // console.log(req.body);
     // res.status(200).json({ success: true });
     const newProduct = new Product(req.body);
 
     const savedProduct = await newProduct.save();
-    console.log(savedProduct);
+    // console.log(savedProduct);
 
     if (savedProduct) res.status(200).json({ success: true, savedProduct });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Get the images that have been uploaded from the list of their ids
+// @route   POST /api/products/images-url
+// @access  Private (admin only)
+export const getSignedUrlsFromList = async (req, res) => {
+  try {
+    const { imageIDs } = req.body;
+
+    let imagesUrls = [];
+    for (let imageID of imageIDs) {
+      // find the image
+      const image = await Upload.findById(imageID);
+      const params = {
+        Bucket: bucketName,
+        Key: image.name,
+      };
+      const command = new GetObjectCommand(params);
+      const seconds = 60;
+      const url = await getSignedUrl(s3Client, command, {
+        expiresIn: seconds,
+      });
+      const imageItem = { _id: image._id, name: image.name, url };
+      imagesUrls = [...imagesUrls, imageItem];
+    }
+    res.status(200).json({ success: true, urls: imagesUrls });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+// @desc    Get all the products
+// @route   GET /api/products
+// @access  Private (admin only)
+export const getProducts = async (req, res) => {
+  try {
+    const products = await Product.find({});
+    if (products) {
+      res.status(200).json({ success: true, products });
+    } else {
+      return res.json({
+        success: false,
+        error: 'An error occurred when retrieving products',
+      });
+    }
   } catch (err) {
     console.log(err);
   }
